@@ -1,0 +1,14 @@
+{
+    "name": "yourname/contacts-agenda-php",
+    "description": "Simple contacts agenda system built with PHP (no framework)",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "ContactsAgenda\\": "src/",
+            "ContactsAgenda\\Config\\": "config/"
+        }
+    },
+    "require": {
+        "vlucas/phpdotenv": "^5.6"
+    }
+}

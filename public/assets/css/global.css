@@ -1,0 +1,18 @@
+/* Messages */
+.messages {
+    margin: 15px 0;
+}
+.message {
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
