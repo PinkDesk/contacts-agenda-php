@@ -1,18 +1,228 @@
-/* Messages */
-.messages {
-    margin: 15px 0;
+/* 
+ * Basic reset for all elements.
+ * Removes default margin and padding, sets box-sizing to border-box.
+ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
-.message {
+
+/*
+ * Global body styling.
+ * Applies dark background, light text color, readable font, and base padding.
+ */
+body {
+    background: #0d0f12;
+    color: #e5e7eb;
+    font-family: 'Inter', sans-serif;
+    padding: 40px 20px;
+}
+
+/*
+ * Central container used to limit content width and center it on the screen.
+ */
+.container, #app {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/*
+ * Headings styling.
+ * Applies green color, bottom margin, and font weight for clear hierarchy.
+ */
+h1, h2, h3 {
+    color: #4CAF50;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+/*
+ * Error and success messages styling.
+ * Adds padding, border, background, rounded corners, and spacing below messages.
+ */
+.error, .success, .message {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.error, .message.error {
+    background: #3a0d0d;
+    border-left: 4px solid #ef4444;
+    color: #fca5a5;
+}
+
+.success, .message.success {
+    background: #0f3b29;
+    border-left: 4px solid #34d399;
+    color: #d1fae5;
+}
+
+/*
+ * Form wrapper styling.
+ * Adds padding, rounded borders, background color, and spacing below form.
+ */
+form {
+    background: #111317;
+    border: 1px solid #1f242d;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+/*
+ * Form label styling.
+ * Displayed as block, with bottom margin and subtle color for readability.
+ */
+label {
+    display: block;
+    margin-bottom: 6px;
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+/*
+ * General form input styling.
+ * Inputs and selects stretch to full width with padding, border, rounded corners, and smooth transitions.
+ */
+input, textarea, select {
+    background: #111317;
+    border: 1px solid #1E1E23;
+    color: #E0E0E0;
     padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 5px;
-    font-weight: bold;
+    width: 100%;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-bottom: 14px;
+    transition: border 0.2s, box-shadow 0.2s;
 }
-.message.success {
-    background-color: #d4edda;
-    color: #155724;
+
+/*
+ * Input focus styling.
+ * Changes border color and adds soft glow effect.
+ */
+input:focus, textarea:focus, select:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 5px #4CAF50AA;
+    outline: none;
 }
-.message.error {
-    background-color: #f8d7da;
-    color: #721c24;
+
+/*
+ * Phone field container styling.
+ * Flex layout with spacing between input and button.
+ */
+.phone-field {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.phone-field input {
+    flex: 1;
+}
+
+.phone-field button {
+    flex-shrink: 0;
+}
+
+/*
+ * Button styling.
+ * Sets background, border, color, rounded corners, padding, cursor, and smooth hover/transition effects.
+ */
+button {
+    background-color: #1E1E23;
+    border: 1px solid #1E1E23;
+    border-radius: 6px;
+    padding: 6px 14px;
+    color: #E0E0E0;
+    cursor: pointer;
+    transition: border 0.2s, box-shadow 0.2s, transform 0.1s, color 0.2s;
+}
+
+button:hover {
+    border-color: #4CAF50;
+    box-shadow: 0 0 5px #4CAF50AA;
+    color: #4CAF50;
+    transform: translateY(-1px);
+}
+
+button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Delete button styling */
+
+button.delete:hover {
+    border-color: #EF4444;          /* red border on hover */
+    box-shadow: 0 0 5px #EF4444AA;  /* subtle red glow */
+    color: #EF4444;                 /* text turns red */
+    transform: translateY(-1px);
+}
+
+/*
+ * Table styling.
+ * Sets full width, collapses borders, and adds spacing below table.
+ */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+/*
+ * Table header and cell styling.
+ * Adds padding, borders, text alignment, and colors for clarity.
+ */
+table th, table td {
+    padding: 10px;
+    border-bottom: 1px solid #1E1E23;
+    text-align: left;
+}
+
+table th {
+    color: #4CAF50;
+    border-bottom: 2px solid #4CAF50;
+    font-weight: 500;
+}
+
+table tr:hover {
+    background-color: #1A1C20;
+}
+
+table tr:nth-child(even) {
+    background-color: #111317;
+}
+
+tr:nth-child(odd) {
+    background-color: #0d0f12;
+}
+
+/*
+ * Pagination container styling.
+ * Adds spacing and horizontal layout with gaps.
+ */
+.pagination {
+    margin-top: 20px;
+    display: flex;
+    gap: 8px;
+}
+
+.pagination button {
+    padding: 6px 12px;
+}
+
+/*
+ * Additional sections styling.
+ * Adds spacing between different form and list sections.
+ */
+.form-section, .list-section {
+    margin-bottom: 30px;
+}
+
+.form-section input, .form-section button {
+    margin-top: 5px;
+    margin-bottom: 12px;
 }

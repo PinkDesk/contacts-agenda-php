@@ -1,15 +1,26 @@
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('add-phone').addEventListener('click', function() {
-        const container = document.getElementById('phones-container');
-        const div = document.createElement('div');
-        div.className = 'phone-field';
-        div.innerHTML = '<input type="text" name="phones[]" value=""> <button type="button" class="remove-phone">Remove</button>';
-        container.appendChild(div);
+document.addEventListener("DOMContentLoaded", () => {
+
+    const btnAddPhone = document.getElementById("add-phone");
+    const phonesContainer = document.getElementById("phones-container");
+
+    // Add a new phone input field
+    btnAddPhone.addEventListener("click", () => {
+        const field = document.createElement("div");
+        field.classList.add("phone-field");
+
+        field.innerHTML = `
+            <input type="text" name="phones[]" value="">
+            <button type="button" class="remove-phone">Remove</button>
+        `;
+
+        phonesContainer.appendChild(field);
     });
 
-    document.getElementById('phones-container').addEventListener('click', function(e) {
-        if (e.target && e.target.className === 'remove-phone') {
-            e.target.parentNode.remove();
+    // Remove a phone input field
+    phonesContainer.addEventListener("click", (e) => {
+        if (e.target.classList.contains("remove-phone")) {
+            e.target.parentElement.remove();
         }
     });
+
 });

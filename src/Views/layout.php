@@ -4,12 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <title><?= $title ?? 'Contacts Agenda' ?></title>
+
+    <!-- Global CSS -->
     <link rel="stylesheet" href="assets/css/global.css">
+
     <?php
-    // Incluir CSS específico da página, se definido
+    // Include page-specific CSS files if defined
     if (!empty($pageCss)) {
         foreach ($pageCss as $cssFile) {
-            echo '<link rel="stylesheet" href="' . $cssFile . '">';
+            echo '<link rel="stylesheet" href="' . htmlspecialchars($cssFile) . '">';
         }
     }
     ?>
@@ -17,26 +20,29 @@
 
 <body>
     <div class="container">
+
         <?php
-            $currentAction = $_GET['action'] ?? 'index';
-            if (!empty($messages) && is_array($messages) && $currentAction !== 'form'): ?>
-                <div class="messages">
-                    <?php foreach ($messages as $type => $msgs): ?>
-                        <?php foreach ((array)$msgs as $msg): ?>
-                            <div class="message <?= htmlspecialchars($type) ?>"><?= htmlspecialchars($msg) ?></div>
-                        <?php endforeach; ?>
+        // Display session messages (only if not on the form page)
+        $currentAction = $_GET['action'] ?? 'index';
+        if (!empty($messages) && is_array($messages) && $currentAction !== 'form'): ?>
+            <div class="messages">
+                <?php foreach ($messages as $type => $msgs): ?>
+                    <?php foreach ((array)$msgs as $msg): ?>
+                        <div class="message <?= htmlspecialchars($type) ?>"><?= htmlspecialchars($msg) ?></div>
                     <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- Main page content -->
         <?= $content ?>
     </div>
 
-    <script src="assets/js/global.js"></script>
     <?php
-    // Incluir JS específico da página, se definido
+    // Include page-specific JS files if defined
     if (!empty($pageJs)) {
         foreach ($pageJs as $jsFile) {
-            echo '<script src="' . $jsFile . '"></script>';
+            echo '<script src="' . htmlspecialchars($jsFile) . '"></script>';
         }
     }
     ?>
