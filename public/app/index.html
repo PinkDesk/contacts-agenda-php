@@ -17,55 +17,46 @@
 
     <!-- Display API or form error messages -->
     <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
-
-    <!-- Display success messages -->
     <div v-if="successMessage" class="success">{{ successMessage }}</div>
 
-    <!-- =========================== -->
-    <!-- Contact Form (Create / Edit) -->
-    <!-- =========================== -->
+    <!-- Contact Form -->
     <div>
-        <!-- Title changes depending on whether an ID exists -->
         <h2>{{ form.id ? 'Edit Contact' : 'Add Contact' }}</h2>
 
-        <!-- Form submission triggers saveContact() -->
         <form @submit.prevent="saveContact">
             <input type="hidden" v-model="form.id">
 
-            <!-- Name Field -->
             <label>Name:</label>
             <input type="text" v-model="form.name">
 
-            <!-- Email Field -->
             <label>Email:</label>
             <input type="email" v-model="form.email">
 
-            <!-- Address Field -->
             <label>Address:</label>
             <input type="text" v-model="form.address">
 
-            <!-- Dynamic Phone List -->
             <label>Phones:</label>
             <div id="phones-container">
-                <!-- Iterate over dynamic phone inputs -->
                 <div
                     v-for="(phone, index) in form.phones"
                     :key="index"
                     class="phone-field"
                 >
-                    <!-- Two-way binding for each phone -->
-                    <input type="text" v-model="form.phones[index]">
-
-                    <!-- Remove phone row -->
+                    <input
+                        type="text"
+                        v-model="form.phones[index]"
+                        @input="maskPhone(index)"
+                        :class="{ 'invalid': !validatePhone(index) }"
+                        placeholder="(99) 99999-9999"
+                        required
+                    >
                     <button class="delete" type="button" @click="removePhone(index)">Remove</button>
                 </div>
             </div>
 
-            <!-- Add new phone input -->
             <button type="button" @click="addPhone">Add Phone</button>
             <br><br>
 
-            <!-- Submit and Reset Buttons -->
             <button type="submit">{{ form.id ? 'Update' : 'Save' }}</button>
             <button class="delete" type="button" @click="resetForm">Reset</button>
         </form>
@@ -73,12 +64,9 @@
 
     <hr>
 
-    <!-- =========================== -->
-    <!-- Contacts Table (List View) -->
-    <!-- =========================== -->
+    <!-- Contacts List -->
     <h2>Contacts List</h2>
 
-    <!-- Render table only if contacts exist -->
     <table v-if="contacts.length">
         <thead>
             <tr>
@@ -89,24 +77,16 @@
                 <th>Actions</th>
             </tr>
         </thead>
-
         <tbody>
-            <!-- Loop through contacts (one row per contact) -->
             <tr v-for="contact in contacts" :key="contact.id">
                 <td>{{ contact.name }}</td>
                 <td>{{ contact.email }}</td>
                 <td>{{ contact.address }}</td>
                 <td>
-                    <!-- Display all phones separated by comma -->
-                    <span
-                        v-for="(p, i) in contact.phones"
-                        :key="i"
-                    >
-                        {{ p.phone }}{{ i < contact.phones.length - 1 ? ', ' : '' }}
+                    <span v-for="(p, i) in contact.phones" :key="i">
+                        {{ formatPhoneForInput(p.phone) }}{{ i < contact.phones.length - 1 ? ', ' : '' }}
                     </span>
                 </td>
-
-                <!-- Edit and Delete actions -->
                 <td>
                     <button @click="editContact(contact)">Edit</button>
                     <button @click="deleteContact(contact.id)" class="delete">Delete</button>
@@ -114,29 +94,13 @@
             </tr>
         </tbody>
     </table>
-
-    <!-- Fallback if no contacts are found -->
     <div v-else>No contacts found.</div>
 
-    <!-- ================ -->
-    <!-- Pagination Block -->
-    <!-- ================ -->
+    <!-- Pagination -->
     <div class="pagination" v-if="totalPages > 1">
-        <button
-            @click="goToPage(currentPage - 1)"
-            :disabled="currentPage === 1"
-        >
-            Previous
-        </button>
-
+        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1">Previous</button>
         <span>Page {{ currentPage }} of {{ totalPages }}</span>
-
-        <button
-            @click="goToPage(currentPage + 1)"
-            :disabled="currentPage === totalPages"
-        >
-            Next
-        </button>
+        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages">Next</button>
     </div>
 </div>
 
@@ -146,103 +110,87 @@ const { createApp } = Vue;
 createApp({
   data() {
     return {
-      // Loaded contacts for current page
       contacts: [],
-
-      // Feedback message handlers
       errorMessage: '',
       successMessage: '',
-
-      // Contact form (used for both create and edit)
       form: { id: '', name: '', email: '', address: '', phones: [''] },
-
-      // Pagination control
       currentPage: 1,
       perPage: 10,
       totalPages: 1,
-
-      // Sorting direction (true = ascending)
       sortAsc: true
     };
   },
 
   methods: {
     /**
-     * Fetch the list of contacts from the API.
-     * Supports pagination and alphabetical sorting.
+     * Format raw phone for input mask (used for display & edit)
+     * Supports +55XXXXXXXXXXX or XXXXXXXXXXX
      */
-    fetchContacts(page = 1) {
-      this.currentPage = page;
+    formatPhoneForInput(raw) {
+      let v = raw.toString().replace(/[^\d]/g, '');
+      if (raw.startsWith('+55') && v.startsWith('55')) {
+        v = v.slice(2);
+      }
 
-      fetch(`/api.php?method=list&page=${page}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.status === 'success') {
-            this.contacts = data.data;
-
-            // Determine total pages from server or fallback
-            const totalRecords = data.total || data.data.length;
-            this.totalPages = Math.ceil(totalRecords / this.perPage);
-
-            // Alphabetical sorting by contact name
-            this.contacts.sort((a, b) => {
-              const nameA = a.name.toLowerCase();
-              const nameB = b.name.toLowerCase();
-              if (nameA < nameB) return this.sortAsc ? -1 : 1;
-              if (nameA > nameB) return this.sortAsc ? 1 : -1;
-              return 0;
-            });
-          } else {
-            this.errorMessage = 'Failed to fetch contacts.';
-          }
-        })
-        .catch(err => {
-          this.errorMessage = 'Error connecting to API.';
-          console.error(err);
-        });
+      if (v.length > 10) {
+        // Mobile 11 digits
+        v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+      } else if (v.length > 5) {
+        // Landline 10 digits
+        v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+      } else if (v.length > 2) {
+        v = v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+      } else {
+        v = v.replace(/^(\d*)/, '($1');
+      }
+      return v;
     },
 
     /**
-     * Navigate through paginated results.
+     * Apply phone mask while typing
      */
-    goToPage(page) {
-      if (page < 1 || page > this.totalPages) return;
-      this.fetchContacts(page);
+    maskPhone(index) {
+      let v = this.form.phones[index].replace(/[^\d]/g, '');
+      if (v.length > 10) {
+        v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+      } else if (v.length > 5) {
+        v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+      } else if (v.length > 2) {
+        v = v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+      } else {
+        v = v.replace(/^(\d*)/, '($1');
+      }
+      this.form.phones[index] = v;
     },
 
     /**
-     * Toggle alphabetical order between ascending and descending.
+     * Validate a single phone field
      */
-    toggleSort() {
-      this.sortAsc = !this.sortAsc;
-      this.contacts.reverse();
+    validatePhone(index) {
+      const pattern = /^\(\d{2}\) \d{4,5}-\d{4}$/;
+      return pattern.test(this.form.phones[index]);
     },
 
     /**
-     * Add a new phone field to the form.
+     * Validate all phones
      */
-    addPhone() {
-      this.form.phones.push('');
-    },
-
-    /**
-     * Remove a phone field by index.
-     */
-    removePhone(index) {
-      this.form.phones.splice(index, 1);
-    },
-
-    /**
-     * Reset the form to its initial state.
-     */
-    resetForm() {
-      this.form = { id: '', name: '', email: '', address: '', phones: [''] };
+    validateAllPhones() {
+      for (let i = 0; i < this.form.phones.length; i++) {
+        if (!this.validatePhone(i)) {
+          this.errorMessage = `Phone #${i+1} is invalid. Format: (99) 99999-9999`;
+          return false;
+        }
+      }
       this.errorMessage = '';
-      this.successMessage = '';
+      return true;
     },
 
+    addPhone() { this.form.phones.push(''); },
+    removePhone(index) { this.form.phones.splice(index, 1); },
+    resetForm() { this.form = { id: '', name: '', email: '', address: '', phones: [''] }; this.errorMessage = ''; this.successMessage = ''; },
+
     /**
-     * Populate the form with the selected contact's data for editing.
+     * Populate form for editing (applies mask automatically)
      */
     editContact(contact) {
       this.form = {
@@ -250,19 +198,17 @@ createApp({
         name: contact.name,
         email: contact.email,
         address: contact.address,
-        phones: contact.phones.map(p => p.phone)
+        phones: contact.phones.length ? contact.phones.map(p => this.formatPhoneForInput(p.phone)) : ['']
       };
-
       this.errorMessage = '';
       this.successMessage = '';
     },
 
     /**
-     * Create a new contact or update an existing one.
+     * Save contact
      */
     saveContact() {
-      this.errorMessage = '';
-      this.successMessage = '';
+      if (!this.validateAllPhones()) return;
 
       const method = this.form.id ? 'update' : 'create';
       const idQuery = this.form.id ? '&id=' + this.form.id : '';
@@ -272,28 +218,24 @@ createApp({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(this.form)
       })
-        .then(res => res.json())
-        .then(data => {
-          if (data.status === 'success') {
-            this.successMessage = data.message || 'Contact saved!';
-            this.resetForm();
-            this.fetchContacts(this.currentPage);
-          } else {
-            this.errorMessage = data.message || 'Failed to save contact.';
-          }
-        })
-        .catch(err => {
-          this.errorMessage = 'Error connecting to API.';
-          console.error(err);
-        });
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          this.successMessage = data.message || 'Contact saved successfully!';
+          this.resetForm();
+          this.fetchContacts(this.currentPage);
+        } else {
+          this.errorMessage = data.message || 'Failed to save contact.';
+        }
+      })
+      .catch(err => {
+        this.errorMessage = 'Error connecting to API.';
+        console.error(err);
+      });
     },
 
-    /**
-     * Delete a contact after user confirmation.
-     */
     deleteContact(id) {
       if (!confirm('Are you sure you want to delete this contact?')) return;
-
       fetch(`/api.php?method=delete&id=${id}`, { method: 'DELETE' })
         .then(res => res.json())
         .then(data => {
@@ -308,15 +250,40 @@ createApp({
           this.errorMessage = 'Error connecting to API.';
           console.error(err);
         });
-    }
+    },
+
+    fetchContacts(page = 1) {
+      this.currentPage = page;
+      fetch(`/api.php?method=list&page=${page}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            this.contacts = data.data;
+            const totalRecords = data.total || data.data.length;
+            this.totalPages = Math.ceil(totalRecords / this.perPage);
+            this.contacts.sort((a, b) => {
+              const nameA = a.name.toLowerCase();
+              const nameB = b.name.toLowerCase();
+              return this.sortAsc ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+            });
+          } else {
+            this.errorMessage = 'Failed to fetch contacts.';
+          }
+        })
+        .catch(err => {
+          this.errorMessage = 'Error connecting to API.';
+          console.error(err);
+        });
+    },
+
+    goToPage(page) { if (page >= 1 && page <= this.totalPages) this.fetchContacts(page); },
+    toggleSort() { this.sortAsc = !this.sortAsc; this.contacts.reverse(); }
   },
 
-  /**
-   * Fetch contacts automatically when the component is mounted.
-   */
   mounted() {
     this.fetchContacts();
   }
+
 }).mount('#app');
 </script>
 

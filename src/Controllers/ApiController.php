@@ -1,8 +1,8 @@
 <?php
 namespace ContactsAgenda\Controllers;
 
-use ContactsAgenda\Models\Contact;
-use ContactsAgenda\Models\Phone;
+use ContactsAgenda\Models\ContactModel;
+use ContactsAgenda\Models\PhoneModel;
 
 class ApiController
 {
@@ -16,8 +16,8 @@ class ApiController
      */
     public function __construct()
     {
-        $this->contactModel = new Contact();
-        $this->phoneModel   = new Phone();
+        $this->contactModel = new ContactModel();
+        $this->phoneModel   = new PhoneModel();
 
         if (session_status() === PHP_SESSION_NONE) {
             session_start();

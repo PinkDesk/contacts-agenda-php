@@ -51,30 +51,28 @@ if (!empty($messages)) {
     <label>Phones:</label><br>
     <div id="phones-container">
         <?php
-            // Determine which phones to display
             $phonesToShow = [];
             if (!empty($phones)) {
-                // Use phones from POST after a validation error
                 $phonesToShow = $phones;
             } elseif (!empty($contact['phones'])) {
-                // Use phones from the database
                 foreach ($contact['phones'] as $p) {
                     $phonesToShow[] = is_array($p) ? $p['phone'] : $p;
                 }
             } else {
-                // Default empty phone field
                 $phonesToShow[] = '';
             }
 
-            // Render phone input fields
             foreach ($phonesToShow as $p) {
+                $phoneValue = is_array($p) ? ($p['phone'] ?? '') : $p;
                 echo '<div class="phone-field">
-                        <input type="text" name="phones[]" value="' . htmlspecialchars($p) . '">
+                        <input type="text" name="phones[]" value="' . htmlspecialchars((string)$phoneValue) . '" placeholder="(99) 99999-9999" required>
                         <button type="button" class="remove-phone delete">Remove</button>
+                        <span class="error-msg"></span>
                     </div>';
             }
         ?>
     </div>
+    <button type="button" id="add-phone" class="btn">Add Phone</button>
 
     <!-- Buttons to add new phone or save contact -->
     <button type="button" id="add-phone">Add Phone</button>

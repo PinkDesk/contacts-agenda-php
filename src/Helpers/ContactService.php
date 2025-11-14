@@ -1,16 +1,16 @@
 <?php
 namespace ContactsAgenda\Helpers;
 
-use ContactsAgenda\Models\Contact;
+use ContactsAgenda\Models\ContactModel;
 
 class ContactService {
     private $contactModel;
 
     /**
      * Constructor
-     * Injects the Contact model dependency.
+     * Injects the ContactModel model dependency.
      */
-    public function __construct(Contact $contactModel) {
+    public function __construct(ContactModel $contactModel) {
         $this->contactModel = $contactModel;
     }
 

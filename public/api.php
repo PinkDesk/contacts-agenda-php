@@ -4,8 +4,8 @@ session_start();
 require __DIR__ . '/../vendor/autoload.php';
 
 use ContactsAgenda\Controllers\ContactController;
-use ContactsAgenda\Models\Contact;
-use ContactsAgenda\Models\Phone;
+use ContactsAgenda\Models\ContactModel;
+use ContactsAgenda\Models\PhoneModel;
 use ContactsAgenda\Helpers\ContactService;
 use ContactsAgenda\Helpers\PhoneService;
 use ContactsAgenda\Helpers\Logger;
@@ -26,8 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 /**
  * Initialize models and services
  */
-$contactModel   = new Contact();
-$phoneModel     = new Phone();
+$contactModel   = new ContactModel();
+$phoneModel     = new PhoneModel();
 $contactService = new ContactService($contactModel);
 $phoneService   = new PhoneService($phoneModel);
 $logger         = new Logger();

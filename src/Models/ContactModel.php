@@ -4,7 +4,7 @@ namespace ContactsAgenda\Models;
 use ContactsAgenda\Config\Database;
 use PDO;
 
-class Contact {
+class ContactModel {
     private $pdo;
 
     /**
@@ -16,16 +16,26 @@ class Contact {
     }
 
     /**
-     * Create a new contact
-     * @param string $name Contact name
-     * @param string $email Contact email
-     * @param string $address Contact address
-     * @return bool True on success, false on failure
-     */
-    public function create($name, $email, $address) {
-        $stmt = $this->pdo->prepare("INSERT INTO contacts (name, email, address) VALUES (?, ?, ?)");
-        return $stmt->execute([$name, $email, $address]);
+ * Create a new contact
+ * @param string $name Contact name
+ * @param string $email Contact email
+ * @param string $address Contact address
+ * @return int ID of the newly created contact
+ * @throws Exception if insert fails
+ */
+public function create($name, $email, $address) {
+    $stmt = $this->pdo->prepare("INSERT INTO contacts (name, email, address) VALUES (?, ?, ?)");
+
+    try {
+        $stmt->execute([$name, $email, $address]);
+        return (int) $this->pdo->lastInsertId();
+    } catch (\PDOException $e) {
+        if ($e->getCode() == 23000) { // unique constraint violation
+            throw new \Exception('Email already exists');
+        }
+        throw $e;
     }
+}
 
     /**
      * Get all contacts with optional pagination

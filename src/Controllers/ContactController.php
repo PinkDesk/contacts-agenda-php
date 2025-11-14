@@ -1,8 +1,8 @@
 <?php
 namespace ContactsAgenda\Controllers;
 
-use ContactsAgenda\Models\Contact;
-use ContactsAgenda\Models\Phone;
+use ContactsAgenda\Models\ContactModel;
+use ContactsAgenda\Models\PhoneModel;
 use ContactsAgenda\Helpers\ContactService;
 use ContactsAgenda\Helpers\PhoneService;
 use ContactsAgenda\Helpers\Logger;
@@ -19,11 +19,26 @@ class ContactController {
      * Initializes models, services, and logger
      */
     public function __construct() {
-        $this->contactModel   = new Contact();
-        $this->phoneModel     = new Phone();
+        $this->contactModel   = new ContactModel();
+        $this->phoneModel     = new PhoneModel();
         $this->contactService = new ContactService($this->contactModel);
         $this->phoneService   = new PhoneService($this->phoneModel);
         $this->logger         = new Logger();
+    }
+
+    // Redirect helper to be testable
+    protected function redirect(string $url)
+    {
+        header("Location: $url");
+
+        if (!defined('UNIT_TEST')) {
+            exit;
+        }
+    }
+
+    // Only for testing purposes
+    public function getContactModel() {
+        return $this->contactModel;
     }
 
     /**
@@ -80,8 +95,7 @@ class ContactController {
             $_SESSION['old_input'] = $data;
 
             // Redirect back to form
-            header("Location: index.php?action=form&id=" . ($data['id'] ?? ''));
-            exit;
+            $this->redirect("index.php?action=form&id=" . ($data['id'] ?? ''));
         }
 
         try {
@@ -100,7 +114,42 @@ class ContactController {
         }
 
         // Redirect to contacts list after saving
-        header("Location: index.php");
-        exit;
+        $this->redirect("index.php");
     }
+
+    /**
+    * Delete a contact by ID
+    *
+    * @param int $id Contact ID
+    */
+    public function delete($id)
+    {
+        if (!$id) {
+            $_SESSION['errors'] = ["Invalid contact ID."];
+            $this->redirect("index.php");
+            return;
+        }
+
+        try {
+            // Delete all phones associated with this contact
+            $this->phoneService->syncPhones($id, []); // deletes all phones
+
+            // Delete the contact itself directly via model
+            $deleted = $this->contactModel->delete($id);
+
+            if ($deleted) {
+                $_SESSION['success'] = "Contact deleted successfully!";
+            } else {
+                $_SESSION['errors'] = ["Failed to delete contact."];
+            }
+        } catch (\Exception $e) {
+            // Log unexpected errors
+            $this->logger->error("Failed to delete contact ID $id: " . $e->getMessage());
+            $_SESSION['errors'] = ["An unexpected error occurred while deleting the contact."];
+        }
+
+        // Redirect back to the contacts list
+        $this->redirect("index.php");
+    }
+
 }

@@ -1,16 +1,16 @@
 <?php
 namespace ContactsAgenda\Helpers;
 
-use ContactsAgenda\Models\Phone;
+use ContactsAgenda\Models\PhoneModel;
 
 class PhoneService {
     private $phoneModel;
 
     /**
      * Constructor
-     * @param Phone $phoneModel Injected Phone model dependency
+     * @param PhoneModel $phoneModel Injected Phone model dependency
      */
-    public function __construct(Phone $phoneModel) {
+    public function __construct(PhoneModel $phoneModel) {
         $this->phoneModel = $phoneModel;
     }
 
@@ -21,15 +21,16 @@ class PhoneService {
      * @param array $phones Array of phone numbers to sync
      */
     public function syncPhones(int $contactId, array $phones): void {
-        // Remove old phone records for this contact
+        // Remove old phones
         foreach ($this->phoneModel->getByContact($contactId) as $p) {
             $this->phoneModel->delete($p['id']);
         }
 
-        // Add new phone numbers if valid
+        // Add new phones
         foreach ($phones as $phone) {
-            if (!empty($phone) && $this->validatePhoneFormat($phone)) {
-                $this->phoneModel->add($contactId, $phone);
+            $cleanPhone = preg_replace('/\D+/', '', $phone); // remove tudo que não for dígito
+            if (!empty($cleanPhone)) {
+                $this->phoneModel->add($contactId, $cleanPhone);
             }
         }
     }
