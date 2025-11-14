@@ -17,7 +17,7 @@ This project is a Contacts Management application designed for sales teams. User
 
 ## Technologies Used
 
-* **Backend:** PHP (PSR-4 structure)
+* **Backend:** PHP 7.3.13 (PSR-4 structure)
 * **Database:** MySQL or SQLite
 * **Frontend:** Vanilla Vue.js 3 (no build tools)
 * **CSS:** Custom Dark Clean theme
