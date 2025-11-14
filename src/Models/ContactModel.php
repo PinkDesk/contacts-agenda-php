@@ -45,7 +45,8 @@ public function create($name, $email, $address) {
      */
     public function getAll($offset = 0, $limit = null)
     {
-        $sql = "SELECT * FROM contacts ORDER BY name ASC";
+        $sql = "SELECT * FROM contacts ORDER BY LOWER(name) ASC"; // <-- aqui
+
         if ($limit !== null) {
             $sql .= " LIMIT :limit OFFSET :offset";
         }
